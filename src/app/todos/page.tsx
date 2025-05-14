@@ -1,8 +1,9 @@
 "use client";
 
 import api from "@/api/axios/api";
-import { TodoListType, TodoType } from "@/types/todo.type";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useGetTodos } from "@/hooks/queries/useTodosQuery";
+import { TodoType, updateType } from "@/types/todo.type";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 type CompletedType = "all" | "completed" | "incompleted";
@@ -14,13 +15,7 @@ const TodoList = () => {
   const [editTitle, setEditTitle] = useState("");
   const [completed, setCompleted] = useState<CompletedType>("all");
 
-  const { data, isFetching, isError } = useQuery({
-    queryKey: ["todos"],
-    queryFn: async () => {
-      const { data } = await api.get("/todos");
-      return data as TodoListType;
-    },
-  });
+  const { data, isFetching, isError } = useGetTodos();
 
   const addTodo = async (newTodo: TodoType) => {
     await api.post("/todos", newTodo);
@@ -28,12 +23,6 @@ const TodoList = () => {
 
   const removeTodo = async (targetId: string) => {
     await api.delete("/todos/" + targetId);
-  };
-
-  type updateType = {
-    editId: string;
-    editTitle?: string;
-    editCompleted?: boolean;
   };
 
   const updateTodo = async (updateValue: updateType) => {
