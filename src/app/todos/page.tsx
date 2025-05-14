@@ -21,8 +21,19 @@ const TodoList = () => {
     await api.post("/todos", newTodo);
   };
 
+  const removeTodo = async (targetId: string) => {
+    await api.delete("/todos/" + targetId);
+  };
+
   const { mutate: addMutate } = useMutation({
     mutationFn: addTodo,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["todos"] });
+    },
+  });
+
+  const { mutate: removeMutate } = useMutation({
+    mutationFn: removeTodo,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["todos"] });
     },
@@ -36,6 +47,10 @@ const TodoList = () => {
     };
     addMutate(newTodo);
     setInputValue("");
+  };
+
+  const handleRemoveTodo = (targetId: string) => {
+    removeMutate(targetId);
   };
 
   if (isFetching) return <div>Loading...</div>;
@@ -62,7 +77,7 @@ const TodoList = () => {
             <div key={item.id}>
               <input type="checkbox" />
               {item.title}
-              <button>삭제</button>
+              <button onClick={() => handleRemoveTodo(item.id)}>삭제</button>
               <button>수정</button>
             </div>
           );
