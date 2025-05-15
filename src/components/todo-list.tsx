@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  useAddTodo,
   useRemoveTodo,
   useUpdateTodo,
 } from "@/hooks/mutation/useTodosMutations";
@@ -12,28 +11,15 @@ import { useState } from "react";
 type CompletedType = "all" | "completed" | "incompleted";
 
 const TodoList = () => {
-  const [inputValue, setInputValue] = useState("");
   const [editId, setEditId] = useState("");
   const [editTitle, setEditTitle] = useState("");
   const [completed, setCompleted] = useState<CompletedType>("all");
 
   const { data } = useGetTodos();
 
-  const { mutate: addMutate } = useAddTodo();
-
   const { mutate: removeMutate } = useRemoveTodo();
 
   const { mutate: updateMutate } = useUpdateTodo();
-
-  const handleAddTodo = () => {
-    const newTodo = {
-      id: crypto.randomUUID(),
-      title: inputValue,
-      completed: false,
-    };
-    addMutate(newTodo);
-    setInputValue("");
-  };
 
   const handleRemoveTodo = (targetId: string) => {
     removeMutate(targetId);
@@ -46,7 +32,6 @@ const TodoList = () => {
       editCompleted: updateTodo.editCompleted,
     };
     updateMutate(updateValue);
-    setInputValue("");
   };
 
   const handleResetEdit = () => {
@@ -68,25 +53,7 @@ const TodoList = () => {
   });
 
   return (
-    <div className="w-full max-w-2xl p-6 bg-white text-black shadow-md rounded-lg flex flex-col items-center mx-auto">
-      <h2 className="text-2xl font-bold mb-4">투두리스트</h2>
-      <div className="flex gap-2 mb-6">
-        <input
-          className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-black focus:outline-none focus:ring-2 focus:ring-black"
-          type="text"
-          value={inputValue}
-          onChange={(e) => {
-            setInputValue(e.target.value);
-          }}
-        />
-        <button
-          className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800"
-          onClick={handleAddTodo}
-        >
-          추가
-        </button>
-      </div>
-
+    <>
       <div className="flex justify-between items-center mb-4 text-gray-600">
         <span>
           총 {data.length}개 / 완료{" "}
@@ -210,7 +177,7 @@ const TodoList = () => {
           );
         })}
       </div>
-    </div>
+    </>
   );
 };
 
