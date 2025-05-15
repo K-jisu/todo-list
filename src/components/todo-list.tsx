@@ -21,7 +21,7 @@ const TodoList = () => {
   const [editTitle, setEditTitle] = useState("");
   const [completed, setCompleted] = useState<CompletedType>("all");
 
-  const { data, isFetching, isError } = useGetTodos();
+  const { data } = useGetTodos();
 
   const { mutate: addMutate } = useAddTodo();
 
@@ -58,8 +58,6 @@ const TodoList = () => {
     setEditTitle("");
   };
 
-  if (isFetching) return <div>Loading...</div>;
-  if (isError) return <div>Error occurred</div>;
   if (!data) return <div>No data</div>;
 
   const todos = data.filter((item) => {
