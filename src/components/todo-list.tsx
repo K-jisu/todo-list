@@ -1,6 +1,12 @@
 "use client";
 
-import api from "@/api/axios/api";
+import api from "@/apis/axios/api";
+import { addTodo } from "@/apis/todo.api";
+import {
+  useAddTodo,
+  useRemoveTodo,
+  useUpdateTodo,
+} from "@/hooks/mutation/useTodosMutations";
 import { useGetTodos } from "@/hooks/queries/useTodosQuery";
 import { TodoType, updateType } from "@/types/todo.type";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -17,41 +23,11 @@ const TodoList = () => {
 
   const { data, isFetching, isError } = useGetTodos();
 
-  const addTodo = async (newTodo: TodoType) => {
-    await api.post("/todos", newTodo);
-  };
+  const { mutate: addMutate } = useAddTodo();
 
-  const removeTodo = async (targetId: string) => {
-    await api.delete("/todos/" + targetId);
-  };
+  const { mutate: removeMutate } = useRemoveTodo();
 
-  const updateTodo = async (updateValue: updateType) => {
-    await api.patch(`/todos/${updateValue.editId}`, {
-      title: updateValue.editTitle,
-      completed: updateValue.editCompleted,
-    });
-  };
-
-  const { mutate: addMutate } = useMutation({
-    mutationFn: addTodo,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["todos"] });
-    },
-  });
-
-  const { mutate: removeMutate } = useMutation({
-    mutationFn: removeTodo,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["todos"] });
-    },
-  });
-
-  const { mutate: updateMutate } = useMutation({
-    mutationFn: updateTodo,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["todos"] });
-    },
-  });
+  const { mutate: updateMutate } = useUpdateTodo();
 
   const handleAddTodo = () => {
     const newTodo = {
@@ -85,6 +61,7 @@ const TodoList = () => {
   if (isFetching) return <div>Loading...</div>;
   if (isError) return <div>Error occurred</div>;
   if (!data) return <div>No data</div>;
+
   const todos = data.filter((item) => {
     switch (completed) {
       case "completed":
