@@ -1,4 +1,4 @@
-import api from "@/api/axios/api";
+import api from "@/apis/axios/api";
 import { TodoListType } from "@/types/todo.type";
 import { useQuery } from "@tanstack/react-query";
 
