@@ -1,21 +1,17 @@
 "use client";
 
-import api from "@/apis/axios/api";
-import { addTodo } from "@/apis/todo.api";
 import {
   useAddTodo,
   useRemoveTodo,
   useUpdateTodo,
 } from "@/hooks/mutation/useTodosMutations";
 import { useGetTodos } from "@/hooks/queries/useTodosQuery";
-import { TodoType, updateType } from "@/types/todo.type";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { updateType } from "@/types/todo.type";
 import { useState } from "react";
 
 type CompletedType = "all" | "completed" | "incompleted";
 
 const TodoList = () => {
-  const queryClient = useQueryClient();
   const [inputValue, setInputValue] = useState("");
   const [editId, setEditId] = useState("");
   const [editTitle, setEditTitle] = useState("");
@@ -72,73 +68,144 @@ const TodoList = () => {
   });
 
   return (
-    <div>
-      투두리스트
-      <div>
+    <div className="w-full max-w-2xl p-6 bg-white text-black shadow-md rounded-lg flex flex-col items-center mx-auto">
+      <h2 className="text-2xl font-bold mb-4">투두리스트</h2>
+      <div className="flex gap-2 mb-6">
         <input
-          className="text-black"
+          className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-black focus:outline-none focus:ring-2 focus:ring-black"
           type="text"
           value={inputValue}
           onChange={(e) => {
             setInputValue(e.target.value);
           }}
         />
-        <button onClick={handleAddTodo}>제출</button>
+        <button
+          className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800"
+          onClick={handleAddTodo}
+        >
+          추가
+        </button>
       </div>
-      <div>
-        <div>
-          <span>총 {data.length}개</span>
-          <span>완료 {data.filter((item) => item.completed).length}개</span>
-        </div>
-        <div>
-          <span onClick={() => setCompleted("all")}>전체 투두</span>
-          <span onClick={() => setCompleted("completed")}>완료 투두</span>
-          <span onClick={() => setCompleted("incompleted")}>미완료 투두</span>
-        </div>
+
+      <div className="flex justify-between items-center mb-4 text-gray-600">
+        <span>
+          총 {data.length}개 / 완료{" "}
+          {data.filter((item) => item.completed).length}개
+        </span>
+      </div>
+      <div className="flex gap-4">
+        <span
+          className={`px-2 py-1 rounded ${
+            completed === "all"
+              ? "bg-black text-white"
+              : "bg-gray-100 hover:bg-gray-200"
+          }`}
+          onClick={() => setCompleted("all")}
+        >
+          전체
+        </span>
+        <span
+          className={`px-2 py-1 rounded ${
+            completed === "completed"
+              ? "bg-black text-white"
+              : "bg-gray-100 hover:bg-gray-200"
+          }`}
+          onClick={() => setCompleted("completed")}
+        >
+          완료
+        </span>
+        <span
+          className={`px-2 py-1 rounded ${
+            completed === "incompleted"
+              ? "bg-black text-white"
+              : "bg-gray-100 hover:bg-gray-200"
+          }`}
+          onClick={() => setCompleted("incompleted")}
+        >
+          미완료
+        </span>
+      </div>
+
+      <div className="border border-b-gray-50 w-full m-4" />
+
+      <div className="space-y-3">
         {todos.map((item) => {
           return (
-            <div key={item.id}>
-              <input
-                type="checkbox"
-                checked={item.completed}
-                onChange={() =>
-                  handleUpdateTodo({
-                    editId: item.id,
-                    editCompleted: !item.completed,
-                  })
-                }
-              />
-              {editId === item.id ? (
-                <>
+            <div
+              className="flex items-center justify-between bg-gray-50 p-3 rounded-md border border-gray-200 gap-3 w-full"
+              key={item.id}
+            >
+              <div className="flex items-center gap-3 flex-1">
+                {editId !== item.id && (
+                  <input
+                    type="checkbox"
+                    checked={item.completed}
+                    className="w-4 h-4"
+                    onChange={() =>
+                      handleUpdateTodo({
+                        editId: item.id,
+                        editCompleted: !item.completed,
+                      })
+                    }
+                  />
+                )}
+                {editId === item.id ? (
                   <input
                     type="text"
-                    placeholder="수정할 제목"
-                    className="text-black w-12"
+                    placeholder="수정할 내용"
+                    className="px-2 py-1 border border-gray-300 rounded text-black flex-1"
                     value={editTitle}
                     onChange={(e) => {
                       setEditTitle(e.target.value);
                     }}
                   />
-                </>
-              ) : (
-                item.title
-              )}
-              <button onClick={() => handleRemoveTodo(item.id)}>삭제</button>
-              {editId === item.id ? (
-                <>
-                  <button
-                    onClick={() => {
-                      handleUpdateTodo({ editId: item.id, editTitle });
-                      handleResetEdit();
-                    }}
+                ) : (
+                  <span
+                    className={`flex-1 break-words  ${
+                      item.completed ? "line-through text-gray-400" : ""
+                    }`}
                   >
-                    수정
-                  </button>
-                  <button onClick={handleResetEdit}>취소</button>
-                </>
-              ) : (
-                <button onClick={() => setEditId(item.id)}>수정</button>
-              )}
+                    {item.title}
+                  </span>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2 text-sm flex-shrink-0">
+                {editId === item.id ? (
+                  <>
+                    <button
+                      className="px-2 py-1 bg-black text-white rounded hover:bg-gray-800 w-12"
+                      onClick={() => {
+                        handleUpdateTodo({ editId: item.id, editTitle });
+                        handleResetEdit();
+                      }}
+                    >
+                      저장
+                    </button>
+                    <button
+                      className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300 w-12"
+                      onClick={handleResetEdit}
+                    >
+                      취소
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      className="px-2 py-1 bg-gray-100 rounded hover:bg-gray-200 w-12"
+                      onClick={() => setEditId(item.id)}
+                    >
+                      수정
+                    </button>
+                    <button
+                      className="px-2 py-1 bg-red-100 text-red-600 rounded hover:bg-red-200 w-12"
+                      onClick={() => handleRemoveTodo(item.id)}
+                    >
+                      삭제
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
           );
         })}
